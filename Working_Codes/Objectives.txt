@@ -1,0 +1,4 @@
+Working on 
+1. User that have listened to at least half of the song.
+2. User that have listened to a song of its entirety.
+3. Time between Pause and Play for the user.
