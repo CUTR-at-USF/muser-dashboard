@@ -22,6 +22,14 @@ pd.set_option('display.max_rows', None)
 pd.set_option("display.max_columns", None)
 
 
+# In[ ]:
+
+
+####################
+# ANALYSIS SECTION #
+####################
+
+
 # In[3]:
 
 
@@ -296,20 +304,101 @@ user_behavior_data['not_listening_time']=user_behavior_data['not_listening_time'
 # In[27]:
 
 
-# Extraction Path and file name
+# First extraction of the main cleaned dataset
 path = r'D:\Shyam\Documents\MUSER\Analysis\Cleaned Data'
-
 user_behavior_data.to_csv(os.path.join(path,'muser-user-master.csv'), index=False, encoding='utf-8-sig')
 
 
 # In[ ]:
 
 
-
+###################
+# SUMMARY SECTION #
+###################
 
 
 # In[ ]:
 
 
+# 1.0
+# Create a dataframe to Group By features
+# This one is grouped by User_ID then Song Features
+user_song_group = user_behavior_data.groupby(["user_id","song_artist_name","song_album_name", "song_name"])
 
+
+# In[ ]:
+
+
+# Function to calculate feature metrics
+def my_agg(x):
+    names = {
+        'Elapsed Time Sum': x['elapsed_time_in_min'].sum(),
+        'Half-Song Listening Time': x['player_half_song'].sum(),
+        'Count of Songs': x['song_name'].count(),#nunique()
+        'Count of Half-Songs': x['player_half_song'].nunique(),
+        'Start Date': x['date'].min(),
+        'End Date': x['date'].max(),
+        'Date Unique Count': x['date'].nunique()}
+
+    return pd.Series(names, index=['Elapsed Time Sum', 'Half-Song Listening Time', 'Count of Songs','Count of Half-Songs','Start Date', 'End Date', 'Date Unique Count'])
+
+user_song_group.apply(my_agg)
+
+
+# In[ ]:
+
+
+# Save the grouped by results in a dataframe
+user_song_group = user_song_group.apply(my_agg)
+
+# Sort values by user_id ascending
+user_behavior_data.sort_values('user_id', ascending=True, inplace=True, ignore_index = True)
+
+
+# In[ ]:
+
+
+# 2.0
+# creating a second group by dataframe
+# This one is grouped by User_Id and then Date followed by Songs Features
+user_date_group = user_behavior_data.groupby(["user_id","date","song_name","song_artist_name","song_album_name"])
+
+
+# In[ ]:
+
+
+# Function to calculate feature metrics
+def my_agg(x):
+    names = {
+        'Elapsed Time Sum': x['elapsed_time_in_min'].sum(),
+        'Half-Song Listening Time': x['player_half_song'].sum(),
+        'Count of Songs': x['song_name'].count(),#nunique()
+        'Count of Half-Songs': x['player_half_song'].nunique()}
+    
+    return pd.Series(names, index=['Elapsed Time Sum', 'Half-Song Listening Time', 'Count of Songs','Count of Half-Songs'])
+
+user_date_group.apply(my_agg)
+
+
+# In[ ]:
+
+
+# Save the grouped by results in a dataframe
+user_date_group = user_date_group.apply(my_agg)
+
+# Sort values by user_id ascending
+user_behavior_data.sort_values('user_id', ascending=True, inplace=True, ignore_index = True)
+
+
+# In[ ]:
+
+
+# Second extraction of the two differently formatted summary datasets
+path = r'D:\Shyam\Documents\MUSER\Analysis\Cleaned Data'
+
+# This is to export the first dataframe as a CSV
+user_song_group.to_csv(os.path.join(path,'user_song_group_summary.csv'), index=True, encoding='utf-8-sig')
+
+# This is to export the second dataframe as a separate CSV because it is formatted differently
+user_date_group.to_csv(os.path.join(path,'user_date_group_summary.csv'), index=True, encoding='utf-8-sig')
 
